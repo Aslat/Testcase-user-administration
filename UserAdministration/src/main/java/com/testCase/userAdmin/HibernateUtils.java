@@ -6,7 +6,6 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.query.Query;
-
 import com.testCase.userAdmin.Entities.Account;
 import com.testCase.userAdmin.Entities.BankUser;
 
@@ -24,13 +23,17 @@ public class HibernateUtils {
 		cfg.getProperties().setProperty("hibernate.connection.password",password);
 		
 		sessionFactory = cfg.buildSessionFactory();
-		
-        session = sessionFactory.openSession();
+		session = sessionFactory.openSession();
     }
     
     public static void closeSession() {
-    	session.close();
-    	sessionFactory.close();
+    	if(session != null && session.isOpen()) {
+    		session.close();
+    	}
+    	if(sessionFactory != null && sessionFactory.isOpen()) {
+    		sessionFactory.close();
+    	}
+    	
     }
 	
     public static void insertUser(BankUser user) {
@@ -59,6 +62,8 @@ public class HibernateUtils {
     	
 		BankUser user = (BankUser) session.get(BankUser.class, userId);
         
+		
+		
 		return user;
 	}
 	
