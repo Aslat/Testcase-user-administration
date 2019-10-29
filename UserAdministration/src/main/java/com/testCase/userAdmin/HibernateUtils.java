@@ -7,24 +7,39 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.query.Query;
 
+import com.testCase.userAdmin.Entities.Account;
+import com.testCase.userAdmin.Entities.BankUser;
+
 public class HibernateUtils {	 
+	
+	private static SessionFactory sessionFactory = null;
+	
+    private static Session session = null;
 
  
-    public static SessionFactory buildSessionFactory(String userName, String password) {
+    public static void openSession(String userName, String password) {
     	Configuration cfg = new Configuration();
 		cfg.configure("hibernate.cfg.xml"); //hibernate config xml file name
 		cfg.getProperties().setProperty("hibernate.connection.username",userName);
 		cfg.getProperties().setProperty("hibernate.connection.password",password);
-		return cfg.buildSessionFactory();
+		
+		sessionFactory = cfg.buildSessionFactory();
+		
+        session = sessionFactory.openSession();
+    }
+    
+    public static void closeSession() {
+    	session.close();
+    	sessionFactory.close();
     }
 	
-    public static void insertUser(Session session, BankUser user) {
+    public static void insertUser(BankUser user) {
     	session.beginTransaction();
         session.save(user);
         session.getTransaction().commit();
     }
     
-    public static void readUserList(Session session) {
+    public static void readUserList() {
     	System.out.println();
     	
     	Query q = session.createQuery("select _user from BankUser _user");
@@ -39,25 +54,21 @@ public class HibernateUtils {
 		System.out.println();
     }
 
-	public static BankUser selectUser(Session session, int userId) {
+	public static BankUser selectUser(long userId) {
 		System.out.println();
     	
-    	Query q = session.createQuery("select _user from BankUser _user where user_id = '" + userId + "'");
-        
-        List<BankUser> users = q.list();
-         
-        BankUser user = users.get(0);
+		BankUser user = (BankUser) session.get(BankUser.class, userId);
         
 		return user;
 	}
 	
-	public static void EditUser(Session session, BankUser user) {         
+	public static void editUser(BankUser user) {         
         session.beginTransaction();
         session.saveOrUpdate(user);
         session.getTransaction().commit();
 	}
 	
-	public static void DeleteUser(Session session, BankUser user) {
+	public static void deleteUser(BankUser user) {
 		session.beginTransaction();
 		for(int i = 0; i < user.getAccounts().size(); i++) {
 			session.delete(user.getAccounts().get(i));
@@ -66,7 +77,7 @@ public class HibernateUtils {
         session.getTransaction().commit();
 	}
 
-	public static void readAccountList(Session session, BankUser user) {
+	public static void readAccountList(BankUser user) {
 		System.out.println();
     	
     	Query q = session.createQuery("select _account from Account _account where fk_user_id = '" + user.getUser_id() + "'");
@@ -81,7 +92,7 @@ public class HibernateUtils {
 		System.out.println();
 	}
 
-	public static void insertAccount(Session session, BankUser user, Account account) {
+	public static void insertAccount(BankUser user, Account account) {
 		account.setUser(user);
 		user.getAccounts().add(account);
 		
@@ -91,19 +102,15 @@ public class HibernateUtils {
         session.getTransaction().commit();
 	}
 
-	public static Account selectAccount(Session session, int accountId) {
+	public static Account selectAccount(long accountId) {
 		System.out.println();
-    	
-    	Query q = session.createQuery("select _account from Account _account where account_id = '" + accountId + "'");
-        
-        List<Account> accounts = q.list();
-         
-        Account account = accounts.get(0);
+		
+		Account account = (Account) session.get(Account.class, accountId);
         
 		return account;
 	}
 
-	public static void DeleteAccount(Session session, Account account) {         
+	public static void deleteAccount(Account account) {         
         session.beginTransaction();
         session.delete(account);
         session.getTransaction().commit();

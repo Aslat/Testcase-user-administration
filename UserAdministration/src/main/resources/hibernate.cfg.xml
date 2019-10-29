@@ -23,8 +23,8 @@
         <property name="hibernate.hbm2ddl.auto">update</property>
   
         <!-- Annotated entity classes -->
-        <mapping class="com.testCase.userAdmin.BankUser"/>
-        <mapping class="com.testCase.userAdmin.Account"/>
+        <mapping class="com.testCase.userAdmin.Entities.BankUser"/>
+        <mapping class="com.testCase.userAdmin.Entities.Account"/>
          
     </session-factory>
 </hibernate-configuration>
