@@ -50,4 +50,62 @@ public class HibernateUtils {
         
 		return user;
 	}
+	
+	public static void EditUser(Session session, BankUser user) {         
+        session.beginTransaction();
+        session.saveOrUpdate(user);
+        session.getTransaction().commit();
+	}
+	
+	public static void DeleteUser(Session session, BankUser user) {
+		session.beginTransaction();
+		for(int i = 0; i < user.getAccounts().size(); i++) {
+			session.delete(user.getAccounts().get(i));
+		}
+        session.delete(user);
+        session.getTransaction().commit();
+	}
+
+	public static void readAccountList(Session session, BankUser user) {
+		System.out.println();
+    	
+    	Query q = session.createQuery("select _account from Account _account where fk_user_id = '" + user.getUser_id() + "'");
+        
+        List<Account> accounts = q.list();
+         
+        System.out.println("List of Account of user " + user.getFirst_name() + " " + user.getLast_name());
+        System.out.printf("%-30.30s  %-30.30s %n", "ID", "IBAN");
+        for (Account account : accounts) {
+            System.out.printf("%-30.30s  %-30.30s %n", account.getAccount_id(), account.getIban());
+        }
+		System.out.println();
+	}
+
+	public static void insertAccount(Session session, BankUser user, Account account) {
+		account.setUser(user);
+		user.getAccounts().add(account);
+		
+		session.beginTransaction();
+		session.save(account);
+        session.save(user);
+        session.getTransaction().commit();
+	}
+
+	public static Account selectAccount(Session session, int accountId) {
+		System.out.println();
+    	
+    	Query q = session.createQuery("select _account from Account _account where account_id = '" + accountId + "'");
+        
+        List<Account> accounts = q.list();
+         
+        Account account = accounts.get(0);
+        
+		return account;
+	}
+
+	public static void DeleteAccount(Session session, Account account) {         
+        session.beginTransaction();
+        session.delete(account);
+        session.getTransaction().commit();
+	}
 }

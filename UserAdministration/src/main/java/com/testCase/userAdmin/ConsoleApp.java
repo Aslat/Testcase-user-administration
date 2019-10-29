@@ -28,7 +28,7 @@ public class ConsoleApp {
 	        Session session = sessionFactory.openSession();
 	        
 			while(option > 0 && option < 4 ) {
-				System.out.print("Operations for user " + userName + ":\n"
+				System.out.print("Logged in as the administrator '" + userName + "':\n"
 						+ "0 - Exit\n"
 						+ "1 - Insert bank user\n"
 						+ "2 - Select user\n"
@@ -78,13 +78,14 @@ public class ConsoleApp {
 		
 		
 		while(option < 6 ) {
-			System.out.println("Select operation for user " + user.getFirst_name() + ":\n"
+			System.out.println("Operations for user " + user.getFirst_name() + ":\n"
 					+ "1 - Insert account\n"
 					+ "2 - Select account\n"
 					+ "3 - View accounts\n"
 					+ "4 - Delete user\n"
 					+ "5 - Edit user\n"
-					+ "6 - Back");
+					+ "6 - Back\n"
+					+ "Select operation: ");
 			try {
 				option = Integer.parseInt(in.nextLine());
 			} catch (NumberFormatException e) {
@@ -93,18 +94,19 @@ public class ConsoleApp {
 			
 			switch (option) {
 			case 1:
+				InsertAccountConsole(session, in, user);
 				break;
 			case 2:
-				
+				SelectAccount(session, in, user);
 				break;
 			case 3:
-				
+				HibernateUtils.readAccountList(session, user);
 				break;
 			case 4:
-				
+				DeleteUser(session, in, user);
 				break;
 			case 5:
-	
+				EditUser(session, in, user);
 				break;
 
 			default:
@@ -112,7 +114,51 @@ public class ConsoleApp {
 			}
 		}
 	}
+
+	private void EditUser(Session session, Scanner in, BankUser user) {
+		int option = 1;
+		int accountId = 0;
+		
+		while(option < 2 ) {
+			System.out.println("Which attribute you want to edit for user " + user.getFirst_name() + " " + user.getLast_name() + "?:\n"
+					+ "1 - First name\n"
+					+ "2 - Last name\n"
+					+ "3 - Back\n"
+					+ "Select operation: ");
+			try {
+				option = Integer.parseInt(in.nextLine());
+			} catch (NumberFormatException e) {
+				// TODO: handle exception
+			}
+			
+			switch (option) {
+			case 1:
+				EditUserFirstNameConsole(session, in, user);
+				break;
+			case 2:
+				
+			default:
+				EditUserLastNameConsole(session, in, user);
+				break;
+			}
+		}
+		
+	}
+
+	private void EditUserFirstNameConsole(Session session, Scanner in, BankUser user) {
+		System.out.print("Insert new First Name:\n");
+		String firstName = in.nextLine();
+		user.setFirst_name(firstName);
+		HibernateUtils.EditUser(session, user);
+	}
 	
+	private void EditUserLastNameConsole(Session session, Scanner in, BankUser user) {
+		System.out.print("Insert new Last Name:\n");
+		String lastName = in.nextLine();
+		user.setLast_name(lastName);
+		HibernateUtils.EditUser(session, user);
+	}
+
 	private void InsertBankUserConsole(Session session, Scanner in) {
 		
 		System.out.println("Insert first name: ");
@@ -123,7 +169,69 @@ public class ConsoleApp {
 		user.setFirst_name(firstName);
 		user.setLast_name(lastName);
 		HibernateUtils.insertUser(session, user);
+	}
+	
+	private void InsertAccountConsole(Session session, Scanner in, BankUser user) {
+		System.out.print("Insert IBAN (Except the 4 first digit):\n"
+				+ Account.IBAN_CODE);
+		String iban = in.nextLine();
+		Account account = new Account();
+		account.setIban(Account.IBAN_CODE + iban);
+		HibernateUtils.insertAccount(session, user, account);
+	}
+	
+	private void DeleteUser(Session session, Scanner in, BankUser user) {
+		System.out.println("Are you sure you want to delete the user " + user.getFirst_name() + " " + user.getLast_name() + " and all the accounts? (y/n)");
+		String delete = in.nextLine();
+		if(delete.equals("y")) {
+			HibernateUtils.DeleteUser(session, user);
+		}
 		
+	}
+	
+	private void SelectAccount(Session session, Scanner in, BankUser user) {
+		int option = 1;
+		int accountId = 0;
+		
+		System.out.println("Enter the account id: ");
+		try {
+			accountId = Integer.parseInt(in.nextLine());
+		} catch (NumberFormatException e) {
+			// TODO: handle exception
+		}
+		
+		Account account = HibernateUtils.selectAccount(session, accountId);
+		boolean exit = false;
+		
+		while(option < 2 && !exit) {
+			System.out.println("Operations for account " + account.getIban() + ":\n"
+					+ "1 - Delete account\n"
+					+ "2 - Back\n"
+					+ "Select operation: ");
+			try {
+				option = Integer.parseInt(in.nextLine());
+			} catch (NumberFormatException e) {
+				// TODO: handle exception
+			}
+			
+			switch (option) {
+			case 1:
+				exit = DeleteAccountConsole(session, in, account);
+				break;
+			default:
+				break;
+			}
+		}
+	}
+
+	private boolean DeleteAccountConsole(Session session, Scanner in, Account account) {
+		System.out.println("Are you sure you want to delete the account " + account.getIban() + "? (y/n)");
+		String delete = in.nextLine();
+		if(delete.equals("y")) {
+			HibernateUtils.DeleteAccount(session, account);
+			return true;
+		}
+		return false;
 	}
 	
 }
