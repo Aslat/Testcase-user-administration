@@ -34,7 +34,6 @@ public class SelectUserConsole {
 			exit = true;
 		}
 		
-		
 		while(!exit) {
 			System.out.println("\nOperations for user " + user.getFirst_name() + ":\n"
 					+ "1 - Insert account\n"

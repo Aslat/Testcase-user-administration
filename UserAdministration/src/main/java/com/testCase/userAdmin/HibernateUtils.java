@@ -15,7 +15,6 @@ public class HibernateUtils {
 	
     private static Session session = null;
 
- 
     public static boolean openSession(String userName, String password) {
     	try {
     		Configuration cfg = new Configuration();
@@ -56,10 +55,6 @@ public class HibernateUtils {
     
     public static List<BankUser> readUserList() {
     	System.out.println();
-    	
-//    	Query q = session.createQuery("select _user from BankUser _user");
-//        
-//        List<BankUser> users = q.list();
         
         List<BankUser> users = session.createQuery("select _user from BankUser _user").list();
 		
@@ -100,13 +95,8 @@ public class HibernateUtils {
 	}
 
 	public static List<Account> readAccountList(BankUser user) {    	
-//    	Query q = session.createQuery("select _account from Account _account where fk_user_id = '" + user.getUser_id() + "'");
-//        
-//    	List<Account> accounts = q.list();
-    	
         List<Account> accounts = session.createQuery("select _account from Account _account where fk_user_id = '" + user.getUser_id() + "'").list();
 
-    	
         return accounts;
 	}
 

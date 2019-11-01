@@ -3,10 +3,6 @@ package com.testCase.userAdmin.Console;
 import java.util.List;
 import java.util.Scanner;
 
-import javax.transaction.SystemException;
-
-import org.hibernate.HibernateException;
-
 import com.testCase.userAdmin.HibernateUtils;
 import com.testCase.userAdmin.ValidatorUtils;
 import com.testCase.userAdmin.Entities.BankUser;
@@ -110,7 +106,4 @@ public class ConsoleApp {
         }
 		System.out.println();
 	}
-
-	
-
 }

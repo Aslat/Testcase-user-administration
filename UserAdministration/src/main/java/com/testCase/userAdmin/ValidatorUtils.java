@@ -26,6 +26,4 @@ public class ValidatorUtils {
 		}
 		return true;
 	}
-		
-	
 }
