@@ -2,10 +2,10 @@ package com.testCase.userAdmin;
 
 import java.util.List;
 
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
-import org.hibernate.query.Query;
 import com.testCase.userAdmin.Entities.Account;
 import com.testCase.userAdmin.Entities.BankUser;
 
@@ -16,95 +16,114 @@ public class HibernateUtils {
     private static Session session = null;
 
  
-    public static void openSession(String userName, String password) {
-    	Configuration cfg = new Configuration();
-		cfg.configure("hibernate.cfg.xml"); //hibernate config xml file name
-		cfg.getProperties().setProperty("hibernate.connection.username",userName);
-		cfg.getProperties().setProperty("hibernate.connection.password",password);
-		
-		sessionFactory = cfg.buildSessionFactory();
-		session = sessionFactory.openSession();
+    public static boolean openSession(String userName, String password) {
+    	try {
+    		Configuration cfg = new Configuration();
+    		cfg.configure("hibernate.cfg.xml"); //hibernate config xml file name
+    		cfg.getProperties().setProperty("hibernate.connection.username",userName);
+    		cfg.getProperties().setProperty("hibernate.connection.password",password);
+    		
+    		sessionFactory = cfg.buildSessionFactory();
+    		session = sessionFactory.openSession();
+		} catch (HibernateException e) {
+			return false;
+		}
+    	return true;
+    	
     }
     
     public static void closeSession() {
     	if(session != null && session.isOpen()) {
     		session.close();
     	}
-    	if(sessionFactory != null && sessionFactory.isOpen()) {
+    	if(sessionFactory != null && !sessionFactory.isClosed()) {
     		sessionFactory.close();
     	}
     	
     }
 	
-    public static void insertUser(BankUser user) {
-    	session.beginTransaction();
-        session.save(user);
-        session.getTransaction().commit();
+    public static boolean insertUser(BankUser user) {
+    	try {
+    		session.beginTransaction();
+            session.save(user);
+            session.getTransaction().commit();
+		} catch (Exception e) {
+			return false;
+		}
+    	return true;
+    	
     }
     
-    public static void readUserList() {
+    public static List<BankUser> readUserList() {
     	System.out.println();
     	
-    	Query q = session.createQuery("select _user from BankUser _user");
+//    	Query q = session.createQuery("select _user from BankUser _user");
+//        
+//        List<BankUser> users = q.list();
         
-        List<BankUser> users = q.list();
-         
-        System.out.println("List of bank users");
-        System.out.printf("%-30.30s  %-30.30s %-30.30s %n", "ID", "First Name", "Last Name");
-        for (BankUser user : users) {
-            System.out.printf("%-30.30s  %-30.30s  %-30.30s%n", user.getUser_id(), user.getFirst_name(), user.getLast_name());
-        }
-		System.out.println();
+        List<BankUser> users = session.createQuery("select _user from BankUser _user").list();
+		
+		return users;
     }
 
-	public static BankUser selectUser(long userId) {
-		System.out.println();
-    	
+	public static BankUser selectUser(long userId) {    	
 		BankUser user = (BankUser) session.get(BankUser.class, userId);
-        
-		
-		
+       
 		return user;
 	}
 	
-	public static void editUser(BankUser user) {         
-        session.beginTransaction();
-        session.saveOrUpdate(user);
-        session.getTransaction().commit();
+	public static boolean editUser(BankUser user) {  
+		try {
+			session.beginTransaction();
+	        session.saveOrUpdate(user);
+	        session.getTransaction().commit();
+		} catch (Exception e) {
+			return false;
+		}
+		return true;
+        
 	}
 	
-	public static void deleteUser(BankUser user) {
-		session.beginTransaction();
-		for(int i = 0; i < user.getAccounts().size(); i++) {
-			session.delete(user.getAccounts().get(i));
+	public static boolean deleteUser(BankUser user) {
+		try {
+			session.beginTransaction();
+			for(int i = 0; i < user.getAccounts().size(); i++) {
+				session.delete(user.getAccounts().get(i));
+			}
+	        session.delete(user);
+	        session.getTransaction().commit();
+		} catch (Exception e) {
+			return false;
 		}
-        session.delete(user);
-        session.getTransaction().commit();
+		return true;
+		
 	}
 
-	public static void readAccountList(BankUser user) {
-		System.out.println();
+	public static List<Account> readAccountList(BankUser user) {    	
+//    	Query q = session.createQuery("select _account from Account _account where fk_user_id = '" + user.getUser_id() + "'");
+//        
+//    	List<Account> accounts = q.list();
     	
-    	Query q = session.createQuery("select _account from Account _account where fk_user_id = '" + user.getUser_id() + "'");
-        
-        List<Account> accounts = q.list();
-         
-        System.out.println("List of Account of user " + user.getFirst_name() + " " + user.getLast_name());
-        System.out.printf("%-30.30s  %-30.30s %n", "ID", "IBAN");
-        for (Account account : accounts) {
-            System.out.printf("%-30.30s  %-30.30s %n", account.getAccount_id(), account.getIban());
-        }
-		System.out.println();
+        List<Account> accounts = session.createQuery("select _account from Account _account where fk_user_id = '" + user.getUser_id() + "'").list();
+
+    	
+        return accounts;
 	}
 
-	public static void insertAccount(BankUser user, Account account) {
+	public static boolean insertAccount(BankUser user, Account account) {
 		account.setUser(user);
 		user.getAccounts().add(account);
 		
-		session.beginTransaction();
-		session.save(account);
-        session.save(user);
-        session.getTransaction().commit();
+		try {
+			session.beginTransaction();
+			session.save(account);
+	        session.save(user);
+	        session.getTransaction().commit();
+		} catch (Exception e) {
+			return false;
+		}
+		return true;
+		
 	}
 
 	public static Account selectAccount(long accountId) {
@@ -115,9 +134,14 @@ public class HibernateUtils {
 		return account;
 	}
 
-	public static void deleteAccount(Account account) {         
-        session.beginTransaction();
-        session.delete(account);
-        session.getTransaction().commit();
+	public static boolean deleteAccount(Account account) {  
+		try {
+			session.beginTransaction();
+	        session.delete(account);
+	        session.getTransaction().commit();
+		} catch (Exception e) {
+			return false;
+		}
+		return true;
 	}
 }

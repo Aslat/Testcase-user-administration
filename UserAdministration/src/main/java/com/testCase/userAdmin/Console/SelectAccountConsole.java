@@ -57,7 +57,9 @@ public class SelectAccountConsole {
 		System.out.println("Are you sure you want to delete the account " + account.getIban() + "? (y/n)");
 		String delete = in.nextLine();
 		if(delete.equals("y")) {
-			HibernateUtils.deleteAccount(account);
+			if(HibernateUtils.deleteAccount(account)) {
+				System.out.println("You don't have permission to delete this account");
+			}
 			return true;
 		}
 		return false;

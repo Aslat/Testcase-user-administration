@@ -13,6 +13,7 @@ public class EditUserConsole {
 
 	public void editUser(BankUser user) {
 		int option = 1;
+		exit = false;
 		
 		while(!exit) {
 			System.out.println("\nWhich attribute you want to edit for user " + user.getFirst_name() + " " + user.getLast_name() + "?:\n"
@@ -50,18 +51,24 @@ public class EditUserConsole {
 		}while(!ValidatorUtils.checkName(firstName));
 		
 		user.setFirst_name(firstName);
-		HibernateUtils.editUser(user);
+		editUserConsole(user);
 	}
 	
 	public void editUserLastNameConsole(BankUser user) {
 		String lastName = null;
 		do {
-			System.out.print("Insert new Last Name:\\n");
+			System.out.print("Insert new Last Name:\n");
 			lastName = in.nextLine();
 		}while(!ValidatorUtils.checkName(lastName));
 		
 		user.setLast_name(lastName);
-		HibernateUtils.editUser(user);
+		editUserConsole(user);
+	}
+	
+	public void editUserConsole(BankUser user) {
+		if(!HibernateUtils.editUser(user)) {
+			System.out.println("\nYou need to be the owner of the user to edit it\n");
+		}
 	}
 	
 }

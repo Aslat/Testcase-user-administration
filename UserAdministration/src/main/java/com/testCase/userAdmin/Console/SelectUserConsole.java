@@ -1,5 +1,6 @@
 package com.testCase.userAdmin.Console;
 
+import java.util.List;
 import java.util.Scanner;
 
 import com.testCase.userAdmin.HibernateUtils;
@@ -57,10 +58,10 @@ public class SelectUserConsole {
 				selectAccountConsole.SelectAccount(user);
 				break;
 			case 3:
-				HibernateUtils.readAccountList(user);
+				readAccountListConsole(user);
 				break;
 			case 4:
-				exit = deleteUser(user);
+				exit = deleteUserConsole(user);
 				break;
 			case 5:
 				editUserConsole.editUser(user);
@@ -87,14 +88,26 @@ public class SelectUserConsole {
 		HibernateUtils.insertAccount(user, account);
 	}
 	
-	public boolean deleteUser(BankUser user) {
+	public void readAccountListConsole(BankUser user) {
+		List<Account> accounts = HibernateUtils.readAccountList(user);
+        
+        System.out.println("List of Account of user " + user.getFirst_name() + " " + user.getLast_name());
+        System.out.printf("%-30.30s  %-30.30s %n", "ID", "IBAN");
+        for (Account account : accounts) {
+            System.out.printf("%-30.30s  %-30.30s %n", account.getAccount_id(), account.getIban());
+        }
+		System.out.println();
+	}
+	
+	public boolean deleteUserConsole(BankUser user) {
 		System.out.println("Are you sure you want to delete the user " + user.getFirst_name() + " " + user.getLast_name() + " and all the accounts? (y/n)");
 		String delete = in.nextLine();
 		if(delete.equals("y")) {
-			HibernateUtils.deleteUser(user);
+			if(!HibernateUtils.deleteUser(user)) {
+				System.out.println("\nYou don't have permission to delete this user\n");
+			}
 			return true;
 		}
 		return false;
-		
 	}
 }

@@ -3,7 +3,7 @@ package com.testCase.userAdmin;
 public class ValidatorUtils {
 	
 	public static boolean checkName(String name) {
-		if((name.isEmpty()) || (name == null) || (!name.matches("^[a-zA-Z]*$"))) {
+		if((name.isEmpty()) || (name == null) || (!name.matches("^[a-z A-Z]*$"))) {
 			System.out.println("The data introduced must not be empty or contain numbers");
 			return false;
 		}

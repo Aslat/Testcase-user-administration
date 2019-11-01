@@ -1,5 +1,6 @@
 package com.testCase.userAdmin.Console;
 
+import java.util.List;
 import java.util.Scanner;
 
 import javax.transaction.SystemException;
@@ -32,11 +33,9 @@ public class ConsoleApp {
 			String userName = in.nextLine(); 
 	        System.out.println("Enter the password for the user " + userName + ":"); 
 	        String password = in.nextLine(); 
-	        try {
-	        	HibernateUtils.openSession(userName, password);
-			} catch (HibernateException e) {
+	        if(!HibernateUtils.openSession(userName, password)) {
 				System.out.println("\nThe connection to the DB has failed\n");
-				option = 100;
+				exit = true;
 			}
 	        
 	        
@@ -65,7 +64,7 @@ public class ConsoleApp {
 					selectUserConsole.SelectUser();
 					break;
 				case 3:
-					HibernateUtils.readUserList();
+					readUserListConsole();
 					break;
 				case 4:
 					exit = true;
@@ -98,6 +97,18 @@ public class ConsoleApp {
 		user.setFirst_name(firstName);
 		user.setLast_name(lastName);
 		HibernateUtils.insertUser(user);
+	}
+	
+	private void readUserListConsole() {
+		
+		List<BankUser> users = HibernateUtils.readUserList();
+		
+		System.out.println("List of bank users");
+        System.out.printf("%-30.30s  %-30.30s %-30.30s %n", "ID", "First Name", "Last Name");
+        for (BankUser user : users) {
+            System.out.printf("%-30.30s  %-30.30s  %-30.30s%n", user.getUser_id(), user.getFirst_name(), user.getLast_name());
+        }
+		System.out.println();
 	}
 
 	
